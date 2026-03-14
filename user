@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cavintergency — Resident App</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #1a5cff;
+  --blue-lt: #e8effe;
+  --blue-dk: #0f3db3;
+  --red: #e83030;
+  --red-lt: #ffeaea;
+  --amber: #d97706;
+  --amber-lt: #fef3c7;
+  --green: #059669;
+  --green-lt: #d1fae5;
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --surface2: #f0f2f8;
+  --border: rgba(0,0,0,.08);
+  --text: #0d1117;
+  --text2: #5a6478;
+  --text3: #9aa3b2;
+  --r: 16px;
+  --r-sm: 10px;
+  --r-lg: 22px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; }
+.app-frame { width: 100%; max-width: 430px; min-height: 100vh; background: var(--surface); display: flex; flex-direction: column; position: relative; overflow: hidden; }
+
+/* STATUS BAR */
+.status-bar { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: var(--surface); }
+.sb-time { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; }
+.sb-icons { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+
+/* SCREENS */
+.screen { display: none; flex: 1; flex-direction: column; animation: fadeIn .25s ease; }
+.screen.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── LOGIN ─── */
+.login-bg { flex: 1; background: linear-gradient(160deg, #0d1b4a 0%, #1a3a8f 55%, #0f2a6e 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 28px; }
+.login-emblem { width: 72px; height: 72px; background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.2); border-radius: 22px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+.login-emblem svg { width: 38px; height: 38px; }
+.login-app-name { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -.5px; }
+.login-tagline { font-size: 13px; color: rgba(255,255,255,.6); margin-top: 5px; text-align: center; }
+.login-portal-badge { margin-top: 16px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); padding: 5px 14px; border-radius: 99px; font-size: 12px; color: rgba(255,255,255,.8); }
+.login-card { background: var(--surface); border-radius: 28px 28px 0 0; padding: 28px 24px 36px; }
+.login-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+.field input { width: 100%; padding: 13px 16px; border: 1.5px solid var(--border); border-radius: var(--r-sm); font-size: 15px; font-family: 'DM Sans', sans-serif; background: var(--surface2); color: var(--text); outline: none; transition: border-color .2s; }
+.field input:focus { border-color: var(--blue); background: #fff; }
+.btn-main { width: 100%; padding: 15px; background: var(--blue); color: #fff; border: none; border-radius: var(--r-sm); font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 6px; transition: background .2s; letter-spacing: .1px; }
+.btn-main:active { background: var(--blue-dk); }
+.btn-main.red { background: var(--red); }
+.btn-main.red:active { background: #c02020; }
+.btn-ghost { width: 100%; padding: 13px; background: var(--surface2); color: var(--text); border: 1.5px solid var(--border); border-radius: var(--r-sm); font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
+.login-note { text-align: center; font-size: 12px; color: var(--text3); margin-top: 16px; }
+
+/* ─── HOME / SCANNER ─── */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 8px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.tb-left { display: flex; flex-direction: column; }
+.tb-greeting { font-size: 12px; color: var(--text2); }
+.tb-name { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 600; }
+.tb-live { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--green); font-weight: 500; }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulseDot 2s ease-in-out infinite; }
+@keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.3)} }
+
+.scroll-content { flex: 1; overflow-y: auto; padding: 16px 16px 20px; -webkit-overflow-scrolling: touch; }
+
+/* SCANNER WIDGET */
+.scanner-widget { background: #0b1220; border-radius: var(--r-lg); overflow: hidden; margin-bottom: 14px; }
+.scanner-viewport { position: relative; height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.scan-grid { position: absolute; inset: 0; opacity: .04; background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px); background-size: 24px 24px; }
+.scan-corner { width: 26px; height: 26px; border-color: #3a8aff; border-style: solid; position: absolute; }
+.scan-corner.tl { top: 16px; left: 16px; border-width: 3px 0 0 3px; border-radius: 5px 0 0 0; }
+.scan-corner.tr { top: 16px; right: 16px; border-width: 3px 3px 0 0; border-radius: 0 5px 0 0; }
+.scan-corner.bl { bottom: 16px; left: 16px; border-width: 0 0 3px 3px; border-radius: 0 0 0 5px; }
+.scan-corner.br { bottom: 16px; right: 16px; border-width: 0 3px 3px 0; border-radius: 0 0 5px 0; }
+.scan-line { position: absolute; left: 16px; right: 16px; height: 2px; background: linear-gradient(90deg, transparent, #3a8aff, transparent); animation: scanMove 2.4s ease-in-out infinite; top: 16px; }
+@keyframes scanMove { 0%,100%{top:16px;opacity:.8} 50%{top:calc(100% - 18px);opacity:1} }
+.scan-status-text { font-size: 13px; color: #5a9fff; margin-top: 8px; font-weight: 500; }
+.scanner-label { position: absolute; bottom: 12px; font-size: 9px; color: #2a5a9a; letter-spacing: .12em; text-transform: uppercase; }
+.scanner-cam-icon { font-size: 36px; margin-bottom: 6px; }
+
+.scanner-footer { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-top: 1px solid rgba(255,255,255,.06); }
+.scan-trigger { width: 62px; height: 62px; border-radius: 50%; background: var(--blue); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: transform .15s, background .15s; }
+.scan-trigger:active { transform: scale(.93); background: var(--blue-dk); }
+.scan-meta { font-size: 11px; color: #4a6a9a; line-height: 1.5; }
+
+/* RESULT */
+.result-section { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r-lg); padding: 16px; margin-bottom: 14px; }
+.result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.result-type { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 600; }
+.sev-pill { padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+.sev-high { background: #ffeaea; color: var(--red); }
+.sev-moderate { background: var(--amber-lt); color: var(--amber); }
+.sev-critical { background: #ffeaea; color: var(--red); }
+
+.conf-bar-wrap { margin-bottom: 14px; }
+.conf-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.conf-label { font-size: 12px; color: var(--text2); width: 92px; flex-shrink: 0; }
+.conf-track { flex: 1; height: 6px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+.conf-fill { height: 100%; border-radius: 99px; transition: width 1.2s cubic-bezier(.22,1,.36,1); }
+.conf-pct { font-size: 11px; font-weight: 600; color: var(--text); width: 28px; text-align: right; }
+
+.rescuers-section { margin-bottom: 14px; }
+.sec-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+.rescuer-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.rescuer-tag { padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+.tag-pnp { background: #fff0f0; color: #c02020; border: 1px solid #f5c0c0; }
+.tag-bfp { background: #fff8ec; color: #b05b00; border: 1px solid #f5dba0; }
+.tag-mdrrmo { background: #edfaf4; color: #0a7a50; border: 1px solid #a0dfc0; }
+
+.gps-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--blue-lt); border-radius: var(--r-sm); margin-bottom: 14px; }
+.gps-icon { font-size: 16px; }
+.gps-text { font-size: 12px; color: var(--blue-dk); font-weight: 500; }
+
+.note-field { margin-bottom: 14px; }
+.note-field label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+.note-field textarea { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: var(--r-sm); font-size: 14px; font-family: 'DM Sans', sans-serif; background: var(--surface2); resize: none; outline: none; color: var(--text); }
+.note-field textarea:focus { border-color: var(--blue); background: #fff; }
+
+/* SENT STATE */
+.sent-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r-lg); padding: 28px 20px; text-align: center; margin-bottom: 14px; }
+.sent-icon { font-size: 48px; margin-bottom: 12px; }
+.sent-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.sent-sub { font-size: 14px; color: var(--text2); margin-bottom: 18px; line-height: 1.5; }
+.what-next { text-align: left; background: var(--green-lt); border-radius: var(--r-sm); padding: 14px; }
+.wn-title { font-size: 12px; font-weight: 600; color: #065f46; margin-bottom: 7px; text-transform: uppercase; letter-spacing: .05em; }
+.wn-step { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #047857; margin-bottom: 5px; }
+.wn-num { width: 18px; height: 18px; border-radius: 50%; background: #059669; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+
+/* ALERTS SECTION */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; margin-top: 4px; }
+.sec-h-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; }
+.alert-card { border-radius: var(--r); padding: 13px; margin-bottom: 8px; border-left: 3px solid; }
+.alert-danger { background: #fff5f5; border-color: var(--red); }
+.alert-info { background: #f0f5ff; border-color: var(--blue); }
+.alert-warn { background: #fffbec; border-color: var(--amber); }
+.alert-card-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.alert-card-body { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.alert-card-time { font-size: 11px; color: var(--text3); margin-top: 5px; }
+
+/* SENDING OVERLAY */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(13,17,23,.55); z-index: 200; align-items: center; justify-content: center; }
+.overlay.active { display: flex; }
+.overlay-card { background: var(--surface); border-radius: 22px; padding: 28px 32px; text-align: center; min-width: 220px; }
+.ov-icon { font-size: 36px; margin-bottom: 10px; }
+.ov-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 600; }
+.ov-sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
+.ov-bar { height: 4px; background: var(--surface2); border-radius: 99px; margin-top: 14px; overflow: hidden; }
+.ov-progress { height: 100%; background: var(--blue); border-radius: 99px; width: 0; transition: width 1.4s linear; }
+
+/* BOTTOM SPACER */
+.bottom-safe { height: 28px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="app-frame">
+  <div class="status-bar">
+    <span class="sb-time" id="r-clock">9:18 AM</span>
+    <div class="sb-icons">
+      <span>●●●●</span><span>WiFi</span><span>🔋</span>
+    </div>
+  </div>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="r-overlay">
+    <div class="overlay-card">
+      <div class="ov-icon" id="ov-ico">📡</div>
+      <div class="ov-title" id="ov-t">Sending alert...</div>
+      <div class="ov-sub" id="ov-s">ML classified · GPS attached</div>
+      <div class="ov-bar"><div class="ov-progress" id="ov-prog"></div></div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: LOGIN ── -->
+  <div class="screen active" id="s-login" style="flex-direction:column">
+    <div class="login-bg">
+      <div class="login-emblem">
+        <svg viewBox="0 0 38 38" fill="none">
+          <path d="M19 4L6 11v8c0 7.5 5.5 14.5 13 16.5 7.5-2 13-9 13-16.5v-8L19 4z" fill="rgba(255,255,255,.2)" stroke="rgba(255,255,255,.6)" stroke-width="1.5"/>
+          <path d="M13 19l4 4 8-8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="login-app-name">Cavintergency</div>
+      <div class="login-tagline">Community Emergency Reporting System<br>Municipality of Cavinti, Laguna</div>
+      <div class="login-portal-badge">👤 Resident Portal</div>
+    </div>
+    <div class="login-card">
+      <div class="login-title">Sign in as Resident</div>
+      <div class="field">
+        <label>Phone or username</label>
+        <input type="text" value="juan.dela.cruz" placeholder="+63 9XX XXX XXXX"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" value="••••••••"/>
+      </div>
+      <button class="btn-main" onclick="rLogin()">Sign in</button>
+      <button class="btn-ghost" onclick="rLogin()">Register new account</button>
+      <div class="login-note">Are you a rescuer? Open the <strong>Rescuer Portal</strong> instead.</div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: SCANNER ── -->
+  <div class="screen" id="s-scanner" style="flex-direction:column">
+    <div class="topbar">
+      <div class="tb-left">
+        <div class="tb-greeting">Good morning,</div>
+        <div class="tb-name">Juan Dela Cruz</div>
+      </div>
+      <div class="tb-live"><div class="live-dot"></div>Live</div>
+    </div>
+
+    <div class="scroll-content">
+
+      <!-- SCANNER -->
+      <div class="scanner-widget">
+        <div class="scanner-viewport">
+          <div class="scan-grid"></div>
+          <div class="scan-corner tl"></div><div class="scan-corner tr"></div>
+          <div class="scan-corner bl"></div><div class="scan-corner br"></div>
+          <div class="scan-line" id="r-sl"></div>
+          <div class="scanner-cam-icon">📷</div>
+          <div class="scan-status-text" id="r-smsg">Ready to scan</div>
+          <div class="scanner-label">Cavintergency · AI incident detection</div>
+        </div>
+        <div class="scanner-footer">
+          <div class="scan-meta">
+            <div style="color:#a0c4ff;font-weight:500;margin-bottom:2px">AI-powered scanner</div>
+            <div>Detects type · pins GPS · alerts rescuers</div>
+          </div>
+          <button class="scan-trigger" id="r-scan-btn" onclick="startScan()">📷</button>
+        </div>
+      </div>
+
+      <!-- NEARBY ALERTS -->
+      <div class="section-header">
+        <div class="sec-h-title">Alerts near you</div>
+        <span style="font-size:11px;color:var(--text3)">Cavinti area</span>
+      </div>
+      <div id="nearby-alerts">
+        <div class="alert-card alert-danger">
+          <div class="alert-card-title">Motorcycle accident — Natl Rd km 14</div>
+          <div class="alert-card-body">PNP + BFP dispatched · Avoid the area</div>
+          <div class="alert-card-time">9:18 AM · 0.8 km from you</div>
+        </div>
+        <div class="alert-card alert-info">
+          <div class="alert-card-title">Flood advisory — river crossing</div>
+          <div class="alert-card-body">MDRRMO on site · Road may be impassable</div>
+          <div class="alert-card-time">8:45 AM · 1.2 km from you</div>
+        </div>
+      </div>
+
+      <!-- RESULT -->
+      <div id="r-result" style="display:none">
+        <div class="result-section">
+          <div class="result-header">
+            <div class="result-type" id="r-res-type">—</div>
+            <div class="sev-pill" id="r-res-sev">—</div>
+          </div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:12px" id="r-res-conf">—</div>
+
+          <div class="sec-title">Classification probabilities</div>
+          <div class="conf-bar-wrap" id="r-bars"></div>
+
+          <div class="gps-row">
+            <div class="gps-icon">📍</div>
+            <div class="gps-text">14.2378° N, 121.5642° E · Cavinti · Auto-detected</div>
+          </div>
+
+          <div class="sec-title">Rescuers being alerted</div>
+          <div class="rescuer-tags" id="r-tags"></div>
+        </div>
+
+        <div class="note-field">
+          <label>Add a note for rescuers (optional)</label>
+          <textarea rows="3" placeholder="Describe what you see — number of people, injuries, hazards..."></textarea>
+        </div>
+
+        <button class="btn-main" onclick="confirmSend()">Send alert to rescuers</button>
+        <button class="btn-ghost" onclick="resetScan()">Scan again</button>
+      </div>
+
+      <!-- SENT -->
+      <div id="r-sent" style="display:none">
+        <div class="sent-card">
+          <div class="sent-icon">✅</div>
+          <div class="sent-title">Alert sent!</div>
+          <div class="sent-sub">Rescuers have been notified and are on their way to your location.</div>
+          <div class="what-next">
+            <div class="wn-title">What happens next</div>
+            <div class="wn-step"><div class="wn-num">1</div>Rescuers received your scan + GPS location</div>
+            <div class="wn-step"><div class="wn-num">2</div>Dispatch is being arranged right now</div>
+            <div class="wn-step"><div class="wn-num">3</div>You will receive an SMS update shortly</div>
+            <div class="wn-step"><div class="wn-num">4</div>Report is saved to the blockchain log</div>
+          </div>
+        </div>
+        <button class="btn-ghost" onclick="resetScan()">Report another incident</button>
+      </div>
+    </div>
+    <div class="bottom-safe"></div>
+  </div>
+</div>
+
+<script>
+const SCANS = [
+  { type:'Motorcycle accident', sev:'High', sevCls:'sev-high', conf:'91% confidence · Image + GPS analyzed',
+    bars:[{l:'Road accident',p:91,c:'#e83030'},{l:'Fire risk',p:18,c:'#e85520'},{l:'Flooding',p:5,c:'#2563eb'},{l:'Landslide',p:3,c:'#d97706'}],
+    tags:[{cls:'tag-pnp',t:'👮 PNP Cavinti'},{cls:'tag-bfp',t:'🚒 BFP Cavinti'}] },
+  { type:'Flash flooding', sev:'High', sevCls:'sev-high', conf:'88% confidence · Image + GPS analyzed',
+    bars:[{l:'Flooding',p:88,c:'#2563eb'},{l:'Landslide',p:9,c:'#d97706'},{l:'Road acc.',p:3,c:'#e83030'}],
+    tags:[{cls:'tag-mdrrmo',t:'🌀 MDRRMO'},{cls:'tag-pnp',t:'👮 PNP Cavinti'}] },
+  { type:'Landslide / debris', sev:'Moderate', sevCls:'sev-moderate', conf:'84% confidence · Image + GPS analyzed',
+    bars:[{l:'Landslide',p:84,c:'#d97706'},{l:'Flooding',p:10,c:'#2563eb'},{l:'Road acc.',p:6,c:'#e83030'}],
+    tags:[{cls:'tag-mdrrmo',t:'🌀 MDRRMO'}] },
+  { type:'Structure fire', sev:'Critical', sevCls:'sev-critical', conf:'95% confidence · Image + GPS analyzed',
+    bars:[{l:'Fire',p:95,c:'#e83030'},{l:'Road acc.',p:4,c:'#e85520'},{l:'Other',p:1,c:'#9aa3b2'}],
+    tags:[{cls:'tag-bfp',t:'🚒 BFP Cavinti'},{cls:'tag-pnp',t:'👮 PNP Cavinti'}] }
+];
+
+let scanIdx = 0, lastScan = null, scanTimer = null;
+
+function tick() {
+  const now = new Date();
+  document.getElementById('r-clock').textContent = now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'});
+  setTimeout(tick, 10000);
+}
+tick();
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function rLogin() { showScreen('s-scanner'); }
+
+function startScan() {
+  const btn = document.getElementById('r-scan-btn');
+  const msg = document.getElementById('r-smsg');
+  btn.disabled = true; btn.style.opacity = '0.5';
+  document.getElementById('r-result').style.display = 'none';
+  document.getElementById('r-sent').style.display = 'none';
+  const steps = ['Analyzing scene...','Detecting incident type...','Pinning GPS location...','Identifying rescuers needed...','Finalizing result...'];
+  let i = 0;
+  clearInterval(scanTimer);
+  scanTimer = setInterval(() => {
+    msg.textContent = steps[i % steps.length]; i++;
+    if (i > steps.length) {
+      clearInterval(scanTimer);
+      const d = SCANS[scanIdx % SCANS.length]; scanIdx++; lastScan = d;
+      msg.textContent = '✓ Detection complete';
+      btn.disabled = false; btn.style.opacity = '1';
+      renderResult(d);
+    }
+  }, 400);
+}
+
+function renderResult(d) {
+  document.getElementById('r-res-type').textContent = d.type;
+  const sev = document.getElementById('r-res-sev');
+  sev.textContent = d.sev; sev.className = 'sev-pill ' + d.sevCls;
+  document.getElementById('r-res-conf').textContent = d.conf;
+  document.getElementById('r-bars').innerHTML = d.bars.map(b =>
+    `<div class="conf-row"><div class="conf-label">${b.l}</div><div class="conf-track"><div class="conf-fill" style="width:${b.p}%;background:${b.c}"></div></div><div class="conf-pct">${b.p}%</div></div>`
+  ).join('');
+  document.getElementById('r-tags').innerHTML = d.tags.map(t =>
+    `<div class="rescuer-tag ${t.cls}">${t.t}</div>`
+  ).join('');
+  document.getElementById('r-result').style.display = 'block';
+  document.getElementById('r-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function confirmSend() {
+  const ov = document.getElementById('r-overlay');
+  const prog = document.getElementById('ov-prog');
+  ov.classList.add('active');
+  document.getElementById('ov-ico').textContent = '📡';
+  document.getElementById('ov-t').textContent = 'Sending to rescuers...';
+  document.getElementById('ov-s').textContent = 'ML classified · GPS attached · Blockchain logging';
+  prog.style.width = '0';
+  setTimeout(() => { prog.style.width = '100%'; }, 50);
+  setTimeout(() => {
+    document.getElementById('ov-ico').textContent = '✅';
+    document.getElementById('ov-t').textContent = 'Alert delivered!';
+    document.getElementById('ov-s').textContent = 'Rescuers have been notified';
+    setTimeout(() => {
+      ov.classList.remove('active');
+      document.getElementById('r-result').style.display = 'none';
+      document.getElementById('r-sent').style.display = 'block';
+      document.getElementById('r-sent').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Store for web dashboard to pick up
+      const report = {
+        id: 'CVT-2026-' + String(Math.floor(Math.random()*9000)+1000),
+        type: lastScan.type,
+        severity: lastScan.sev,
+        confidence: lastScan.bars[0].p,
+        gps: '14.2378° N, 121.5642° E',
+        reporter: 'Juan Dela Cruz',
+        time: new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'}),
+        tags: lastScan.tags.map(t=>t.t),
+        status: 'active'
+      };
+      try { localStorage.setItem('cvt_latest_report', JSON.stringify(report)); } catch(e){}
+    }, 900);
+  }, 1500);
+}
+
+function resetScan() {
+  document.getElementById('r-result').style.display = 'none';
+  document.getElementById('r-sent').style.display = 'none';
+  document.getElementById('r-smsg').textContent = 'Ready to scan';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+</body>
+</html>
