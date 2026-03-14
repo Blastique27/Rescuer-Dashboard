@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cavintergency — Rescuer Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:#1a5cff; --blue-lt:#e8effe; --blue-dk:#0f3db3;
+  --red:#dc2626; --red-lt:#fef2f2;
+  --amber:#d97706; --amber-lt:#fffbeb;
+  --green:#059669; --green-lt:#ecfdf5;
+  --teal:#0891b2; --teal-lt:#ecfeff;
+  --purple:#7c3aed; --purple-lt:#f5f3ff;
+  --bg:#f0f2f8;
+  --surface:#ffffff;
+  --surface2:#f4f6fb;
+  --surface3:#edf0f7;
+  --border:rgba(0,0,0,.07);
+  --border2:rgba(0,0,0,.12);
+  --text:#0d1117;
+  --text2:#5a6478;
+  --text3:#9aa3b2;
+  --r:12px; --r-sm:8px; --r-lg:16px;
+  --sidebar:240px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+h1,h2,h3,.syne{font-family:'Syne',sans-serif}
+
+/* ─── LOGIN ─── */
+#login-page{display:flex;min-height:100vh;align-items:stretch}
+.login-left{flex:1;background:linear-gradient(140deg,#0a1628 0%,#0d2a6e 50%,#091d55 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px;max-width:480px}
+.login-right{flex:1;display:flex;align-items:center;justify-content:center;padding:40px;background:var(--surface)}
+.login-emblem{width:64px;height:64px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:24px}
+.login-emblem svg{width:32px;height:32px}
+.login-appname{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1}
+.login-desc{font-size:14px;color:rgba(255,255,255,.55);margin-top:10px;line-height:1.7;max-width:320px}
+.login-features{margin-top:32px;display:flex;flex-direction:column;gap:14px}
+.lf-item{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.75);font-size:13px}
+.lf-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0}
+.login-form-wrap{width:100%;max-width:400px}
+.login-form-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;margin-bottom:6px}
+.login-form-sub{font-size:14px;color:var(--text2);margin-bottom:28px}
+.portal-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:99px;background:var(--red-lt);color:var(--red);font-size:12px;font-weight:600;margin-bottom:24px}
+.rsel{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px}
+.rs-opt{border:1.5px solid var(--border2);border-radius:var(--r);padding:12px 8px;cursor:pointer;text-align:center;transition:all .18s}
+.rs-opt:hover{border-color:#aab4d8;background:var(--surface2)}
+.rs-opt.sel{border-color:var(--red);background:var(--red-lt)}
+.rs-ico{font-size:20px;margin-bottom:4px}
+.rs-lbl{font-size:11px;color:var(--text2);font-weight:500}
+.rs-opt.sel .rs-lbl{color:var(--red)}
+.f-label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:5px;margin-top:14px}
+.f-input{width:100%;padding:12px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);font-size:14px;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;transition:border-color .18s}
+.f-input:focus{border-color:var(--blue);background:#fff}
+.btn-login{width:100%;padding:14px;background:var(--red);color:#fff;border:none;border-radius:var(--r-sm);font-size:15px;font-weight:600;cursor:pointer;margin-top:18px;font-family:'DM Sans',sans-serif;letter-spacing:.1px;transition:background .18s}
+.btn-login:hover{background:#b91c1c}
+.login-note{font-size:12px;color:var(--text3);text-align:center;margin-top:16px}
+
+/* ─── APP SHELL ─── */
+#app-shell{display:none;min-height:100vh;flex-direction:row}
+.sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;bottom:0;left:0;z-index:10}
+.sb-brand{padding:20px 18px 14px;border-bottom:1px solid var(--border)}
+.sb-logo-row{display:flex;align-items:center;gap:10px}
+.sb-logo-icon{width:32px;height:32px;background:var(--red);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-logo-icon svg{width:18px;height:18px}
+.sb-appname{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.sb-loc{font-size:11px;color:var(--text3);margin-top:1px}
+.sb-user{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border)}
+.sb-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.sb-uname{font-size:13px;font-weight:500}
+.sb-urole{font-size:11px;color:var(--text2)}
+.nav-section{padding:10px 18px 3px;font-size:10px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--text2);cursor:pointer;border-left:2px solid transparent;transition:all .15s}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{color:var(--red);border-left-color:var(--red);background:var(--red-lt);font-weight:500}
+.nav-ico{font-size:15px;width:20px;text-align:center}
+.sb-online{margin-top:auto;padding:12px 18px;border-top:1px solid var(--border)}
+.online-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green);margin-bottom:8px}
+.online-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulseDot 2s ease-in-out infinite}
+@keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+.btn-logout{width:100%;padding:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);font-size:12px;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-logout:hover{color:var(--red);border-color:var(--red)}
+
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:5}
+.topbar-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:600;flex:1}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap}
+.bd{background:var(--red-lt);color:var(--red)}
+.bs{background:var(--green-lt);color:var(--green)}
+.bw{background:var(--amber-lt);color:var(--amber)}
+.bi{background:var(--blue-lt);color:var(--blue)}
+.bt{background:var(--teal-lt);color:var(--teal)}
+.bv{background:var(--purple-lt);color:var(--purple)}
+.clock-display{font-size:12px;color:var(--text3);font-family:'Syne',sans-serif}
+
+.page-content{flex:1;padding:22px 24px;overflow-y:auto}
+.view{display:none;animation:fadeIn .2s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── CARDS ─── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:16px}
+.card-header{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:600}
+.card-body{padding:16px 18px}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px}
+.metric-label{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.metric-value{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;line-height:1}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:4px}
+
+/* ALERT CARD */
+.alert-feed{display:flex;flex-direction:column;gap:12px}
+.alert-item{border-radius:var(--r-lg);padding:15px 16px;border-left:3px solid;transition:all .2s}
+.ai-red{background:var(--red-lt);border-color:var(--red)}
+.ai-blue{background:var(--blue-lt);border-color:var(--blue)}
+.ai-amber{background:var(--amber-lt);border-color:var(--amber)}
+.ai-green{background:var(--green-lt);border-color:var(--green)}
+.ai-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+.ai-type{font-family:'Syne',sans-serif;font-size:14px;font-weight:600}
+.ai-meta{font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.5}
+.ai-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.sms-box{background:#071407;border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.sms-text{font-size:11px;color:#6ed86e;font-family:monospace;line-height:1.7}
+.ai-btns{display:flex;gap:8px}
+.btn-accept{padding:8px 18px;background:var(--green);color:#fff;border:none;border-radius:var(--r-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s}
+.btn-accept:hover{background:#047857}
+.btn-forward{padding:8px 18px;background:var(--surface);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r-sm);font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-forward:hover{background:var(--surface2)}
+.btn-close{padding:8px 16px;background:var(--surface);color:var(--text3);border:1px solid var(--border);border-radius:var(--r-sm);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.ai-time{font-size:11px;color:var(--text3);margin-top:8px}
+
+/* WAITING STATE */
+.waiting-state{text-align:center;padding:48px 24px}
+.waiting-icon{font-size:48px;margin-bottom:14px;opacity:.4}
+.waiting-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.waiting-sub{font-size:13px;color:var(--text3)}
+
+/* MAP */
+.map-container{background:#0d1b28;border-radius:var(--r-lg);overflow:hidden;height:320px;position:relative;margin-bottom:16px}
+.map-container svg{width:100%;height:100%}
+.map-legend{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.65);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+.map-legend-item{display:flex;align-items:center;gap:7px;font-size:10px;color:#ccc}
+.ml-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{padding:10px 14px;text-align:left;color:var(--text2);font-weight:600;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.data-table td{padding:10px 14px;color:var(--text);border-bottom:1px solid var(--border)}
+.data-table tr:last-child td{border:none}
+.data-table tr:hover td{background:var(--surface2)}
+.hash{font-family:monospace;font-size:10px;color:var(--text3)}
+
+/* PROGRESS BAR */
+.pb-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pb-label{font-size:12px;color:var(--text2);width:120px;flex-shrink:0}
+.pb-track{flex:1;height:7px;background:var(--surface3);border-radius:99px;overflow:hidden}
+.pb-fill{height:100%;border-radius:99px}
+.pb-pct{font-size:12px;font-weight:600;color:var(--text);width:30px;text-align:right}
+
+/* RESPONDER CARDS */
+.responder-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.responder-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.rc-head{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.rc-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:600}
+.rc-body{padding:12px 14px;display:flex;flex-direction:column;gap:7px}
+.rc-stat{display:flex;justify-content:space-between;font-size:12px;color:var(--text2)}
+.rc-stat span:last-child{font-weight:500;color:var(--text)}
+
+/* NEW ALERT FLASH */
+@keyframes flashIn{0%{transform:translateY(-12px);opacity:0}100%{transform:translateY(0);opacity:1}}
+.new-alert-flash{animation:flashIn .4s cubic-bezier(.22,1,.36,1)}
+
+/* RING ANIMATION */
+@keyframes ring{0%{transform:rotate(0deg)}10%{transform:rotate(15deg)}20%{transform:rotate(-10deg)}30%{transform:rotate(12deg)}40%{transform:rotate(-8deg)}50%,100%{transform:rotate(0deg)}}
+.bell-ring{display:inline-block;animation:ring .6s ease}
+
+/* NOTIFICATION BANNER */
+.notif-banner{display:none;position:fixed;top:16px;right:20px;z-index:100;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 18px;max-width:320px;animation:fadeIn .3s ease}
+.notif-banner.show{display:block}
+.nb-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.nb-body{font-size:12px;color:var(--text2)}
+
+/* TWO-COL LAYOUT */
+.two-col{display:grid;grid-template-columns:1fr 360px;gap:16px}
+.full-col{grid-column:1/-1}
+
+/* SECTION TITLE */
+.section-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;margin-bottom:12px}
+.section-subtitle{font-size:12px;color:var(--text2);margin-bottom:14px}
+
+/* RISK ZONES */
+.risk-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.risk-card{border-radius:var(--r);padding:12px 14px}
+.risk-card-title{font-size:12px;font-weight:600;margin-bottom:4px}
+.risk-card-sub{font-size:11px;color:var(--text2)}
+.risk-high{background:var(--red-lt);border:1px solid #fca5a5}
+.risk-high .risk-card-title{color:var(--red)}
+.risk-med{background:var(--blue-lt);border:1px solid #93c5fd}
+.risk-med .risk-card-title{color:var(--blue-dk)}
+.risk-low{background:var(--amber-lt);border:1px solid #fcd34d}
+.risk-low .risk-card-title{color:var(--amber)}
+</style>
+</head>
+<body>
+
+<!-- NOTIFICATION BANNER -->
+<div class="notif-banner" id="notif-banner">
+  <div class="nb-title" id="nb-title">New alert received</div>
+  <div class="nb-body" id="nb-body"></div>
+</div>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="login-page">
+  <div class="login-left">
+    <div class="login-emblem">
+      <svg viewBox="0 0 32 32" fill="none">
+        <path d="M16 3L4 9v7c0 6.5 4.8 12.6 12 14.3 7.2-1.7 12-7.8 12-14.3V9L16 3z" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.5)" stroke-width="1.5"/>
+        <path d="M11 16l3.5 3.5 7-7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="login-appname">Cavintergency</div>
+    <div class="login-desc">Community Emergency Tracking &amp; Geographic Mapping System for faster response and public issue reporting in Municipality of Cavinti, Laguna.</div>
+    <div class="login-features">
+      <div class="lf-item"><div class="lf-dot"></div>Real-time incident reports from residents</div>
+      <div class="lf-item"><div class="lf-dot"></div>AI-powered incident classification</div>
+      <div class="lf-item"><div class="lf-dot"></div>GPS location tracking &amp; mapping</div>
+      <div class="lf-item"><div class="lf-dot"></div>Automated SMS alerts to responders</div>
+      <div class="lf-item"><div class="lf-dot"></div>Blockchain-secured incident records</div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-form-wrap">
+      <div class="portal-badge">🚨 Rescuer Portal</div>
+      <div class="login-form-title">Sign in as Rescuer</div>
+      <div class="login-form-sub">Choose your unit and enter your credentials to access the dispatch dashboard.</div>
+      <div class="rsel">
+        <div class="rs-opt sel" id="rs-pnp" onclick="selUnit('pnp',this)"><div class="rs-ico">👮</div><div class="rs-lbl">PNP</div></div>
+        <div class="rs-opt" id="rs-bfp" onclick="selUnit('bfp',this)"><div class="rs-ico">🚒</div><div class="rs-lbl">BFP</div></div>
+        <div class="rs-opt" id="rs-md" onclick="selUnit('mdrrmo',this)"><div class="rs-ico">🌀</div><div class="rs-lbl">MDRRMO</div></div>
+      </div>
+      <label class="f-label">Badge / ID number</label>
+      <input class="f-input" id="badge-input" value="PNP-2024-0142"/>
+      <label class="f-label">Password</label>
+      <input class="f-input" type="password" value="••••••••"/>
+      <button class="btn-login" onclick="doLogin()">Sign in to Dashboard</button>
+      <div class="login-note">Residents use the Resident Mobile App — not this portal.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP SHELL ═══════════════ -->
+<div id="app-shell">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo-row">
+        <div class="sb-logo-icon">
+          <svg viewBox="0 0 18 18" fill="none">
+            <path d="M9 1L2 5v4c0 3.8 2.8 7.3 7 8.3 4.2-1 7-4.5 7-8.3V5L9 1z" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.2"/>
+            <path d="M6 9l2.5 2.5 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="sb-appname">Cavintergency</div>
+          <div class="sb-loc">Cavinti, Laguna</div>
+        </div>
+      </div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-av" id="sb-av">SS</div>
+      <div><div class="sb-uname" id="sb-uname">Sgt. Santos</div><div class="sb-urole" id="sb-urole">PNP Officer</div></div>
+    </div>
+    <div class="nav-section">Operations</div>
+    <div class="nav-item active" id="nav-alerts" onclick="navTo('alerts')"><span class="nav-ico">🚨</span>Incoming alerts <span class="badge bd" id="nav-badge" style="margin-left:auto;display:none">0</span></div>
+    <div class="nav-item" id="nav-map" onclick="navTo('map')"><span class="nav-ico">🗺️</span>Incident map</div>
+    <div class="nav-item" id="nav-responders" onclick="navTo('responders')"><span class="nav-ico">🚒</span>Responders</div>
+    <div class="nav-section">Intelligence</div>
+    <div class="nav-item" id="nav-ml" onclick="navTo('ml')"><span class="nav-ico">🤖</span>ML classifier</div>
+    <div class="nav-item" id="nav-blockchain" onclick="navTo('blockchain')"><span class="nav-ico">🔐</span>Blockchain log</div>
+    <div class="nav-section">System</div>
+    <div class="nav-item" id="nav-profile" onclick="navTo('profile')"><span class="nav-ico">👤</span>My profile</div>
+    <div class="sb-online">
+      <div class="online-row"><div class="online-dot"></div>All systems online</div>
+      <button class="btn-logout" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Incoming alerts</div>
+      <span class="badge bd" id="tb-badge" style="display:none">0 active</span>
+      <div class="clock-display" id="clock">Fri 13 Mar 2026 · 09:18 AM</div>
+    </div>
+    <div class="page-content">
+
+      <!-- ── ALERTS VIEW ── -->
+      <div class="view active" id="v-alerts">
+        <div class="metrics-grid">
+          <div class="metric"><div class="metric-label">Active alerts</div><div class="metric-value" style="color:var(--red)" id="m-active">0</div><div class="metric-sub">from residents</div></div>
+          <div class="metric"><div class="metric-label">Avg. response time</div><div class="metric-value">4.2<span style="font-size:16px;font-weight:400">m</span></div><div class="metric-sub" style="color:var(--green)">38% faster</div></div>
+          <div class="metric"><div class="metric-label">Reports today</div><div class="metric-value" id="m-today">0</div><div class="metric-sub">total dispatched</div></div>
+          <div class="metric"><div class="metric-label">ML accuracy</div><div class="metric-value">91<span style="font-size:16px;font-weight:400">%</span></div><div class="metric-sub">classifier</div></div>
+        </div>
+
+        <div class="two-col">
+          <div>
+            <div class="section-title">Live incoming from residents <span id="bell" style="display:inline-block">🔔</span></div>
+            <div id="no-alerts" class="waiting-state">
+              <div class="waiting-icon">📭</div>
+              <div class="waiting-title">Waiting for resident reports</div>
+              <div class="waiting-sub">When a resident scans an incident via the mobile app, it will appear here instantly in real-time.</div>
+            </div>
+            <div class="alert-feed" id="alerts-feed"></div>
+          </div>
+          <div>
+            <div class="section-title">Quick map preview</div>
+            <div class="map-container">
+              <svg id="quick-map" viewBox="0 0 520 320">
+                <rect width="520" height="320" fill="#0d1b28"/>
+                <path d="M20 155 Q120 140 200 158 Q290 172 360 148 Q430 128 510 140" fill="none" stroke="#18304a" stroke-width="6"/>
+                <path d="M200 10 Q197 70 200 158 Q202 225 198 315" fill="none" stroke="#18304a" stroke-width="4"/>
+                <path d="M360 148 Q365 215 358 315" fill="none" stroke="#18304a" stroke-width="3.5"/>
+                <path d="M70 315 Q90 260 110 220 Q135 180 200 158" fill="none" stroke="#162c3c" stroke-width="3"/>
+                <path d="M0 230 Q60 218 110 228 Q170 240 210 222 Q250 205 290 222" fill="none" stroke="#0c2536" stroke-width="8" opacity=".9"/>
+                <ellipse cx="80" cy="90" rx="55" ry="36" fill="#162616" opacity=".7"/>
+                <ellipse cx="420" cy="70" rx="65" ry="42" fill="#162616" opacity=".6"/>
+                <ellipse cx="455" cy="230" rx="60" ry="45" fill="#162616" opacity=".5"/>
+                <text x="255" y="142" text-anchor="middle" fill="#1a3050" font-size="10" font-family="sans-serif">National Road</text>
+                <g id="qm-p1" style="display:none"><circle cx="245" cy="160" r="10" fill="#dc2626" opacity=".25"/><circle cx="245" cy="160" r="6" fill="#dc2626"/></g>
+                <g id="qm-p2" style="display:none"><circle cx="148" cy="224" r="10" fill="#2563eb" opacity=".25"/><circle cx="148" cy="224" r="6" fill="#2563eb"/></g>
+                <g id="qm-p3" style="display:none"><circle cx="425" cy="105" r="10" fill="#d97706" opacity=".25"/><circle cx="425" cy="105" r="6" fill="#d97706"/></g>
+                <g id="qm-p4" style="display:none"><circle cx="300" cy="130" r="10" fill="#e85520" opacity=".25"/><circle cx="300" cy="130" r="6" fill="#e85520"/></g>
+                <circle cx="225" cy="160" r="6" fill="#059669"/><text x="225" y="176" text-anchor="middle" fill="#6ee7b7" font-size="9" font-family="sans-serif">You</text>
+              </svg>
+              <div class="map-legend" id="map-legend"></div>
+            </div>
+            <div class="section-title" style="margin-top:4px">Area advisories</div>
+            <div class="alert-item ai-amber" style="margin-bottom:8px">
+              <div class="ai-type" style="font-size:13px;color:var(--amber)">Flood advisory — river crossing</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:3px">Cavinti river bridge · Road may be impassable</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MAP VIEW ── -->
+      <div class="view" id="v-map">
+        <div class="section-title">Geographic incident map — Cavinti, Laguna</div>
+        <div class="section-subtitle">Click any incident pin to view details. GPS coordinates from resident scans are auto-plotted.</div>
+        <div class="map-container" style="height:420px">
+          <svg viewBox="0 0 900 420">
+            <rect width="900" height="420" fill="#0d1b28"/>
+            <path d="M30 210 Q180 190 300 212 Q400 228 480 200 Q580 174 760 186 Q840 190 890 182" fill="none" stroke="#18304a" stroke-width="7"/>
+            <path d="M300 15 Q295 100 300 212 Q303 295 298 414" fill="none" stroke="#18304a" stroke-width="5"/>
+            <path d="M480 200 Q488 290 480 415" fill="none" stroke="#18304a" stroke-width="4"/>
+            <path d="M100 415 Q130 340 160 290 Q190 248 300 212" fill="none" stroke="#152434" stroke-width="3.5"/>
+            <path d="M0 295 Q80 280 150 295 Q230 312 275 290 Q325 268 375 290" fill="none" stroke="#0c2536" stroke-width="10" opacity=".9"/>
+            <ellipse cx="100" cy="115" rx="80" ry="52" fill="#162616" opacity=".65"/>
+            <ellipse cx="660" cy="88" rx="100" ry="58" fill="#162616" opacity=".6"/>
+            <ellipse cx="710" cy="310" rx="90" ry="62" fill="#162616" opacity=".5"/>
+            <ellipse cx="180" cy="370" rx="70" ry="44" fill="#162616" opacity=".45"/>
+            <text x="390" y="193" text-anchor="middle" fill="#1a3050" font-size="12" font-family="sans-serif">National Road — Cavinti</text>
+            <text x="310" y="340" text-anchor="middle" fill="#0c2536" font-size="10" font-family="sans-serif">Cavinti River</text>
+            <g id="mp-p1" style="display:none;cursor:pointer" onclick="showPinDetail('accident')">
+              <circle cx="375" cy="215" r="14" fill="#dc2626" opacity=".2"/>
+              <circle cx="375" cy="215" r="8" fill="#dc2626"/>
+              <text x="375" y="236" text-anchor="middle" fill="#fca5a5" font-size="10" font-family="sans-serif">Accident</text>
+            </g>
+            <g id="mp-p2" style="display:none;cursor:pointer" onclick="showPinDetail('flood')">
+              <circle cx="215" cy="294" r="14" fill="#2563eb" opacity=".2"/>
+              <circle cx="215" cy="294" r="8" fill="#2563eb"/>
+              <text x="215" y="315" text-anchor="middle" fill="#93c5fd" font-size="10" font-family="sans-serif">Flood</text>
+            </g>
+            <g id="mp-p3" style="display:none;cursor:pointer" onclick="showPinDetail('landslide')">
+              <circle cx="655" cy="130" r="14" fill="#d97706" opacity=".2"/>
+              <circle cx="655" cy="130" r="8" fill="#d97706"/>
+              <text x="655" y="150" text-anchor="middle" fill="#fcd34d" font-size="10" font-family="sans-serif">Landslide</text>
+            </g>
+            <g id="mp-p4" style="display:none;cursor:pointer" onclick="showPinDetail('fire')">
+              <circle cx="440" cy="195" r="14" fill="#e85520" opacity=".2"/>
+              <circle cx="440" cy="195" r="8" fill="#e85520"/>
+              <text x="440" y="215" text-anchor="middle" fill="#fda06e" font-size="10" font-family="sans-serif">Fire</text>
+            </g>
+            <circle cx="350" cy="215" r="7" fill="#059669"/>
+            <text x="350" y="232" text-anchor="middle" fill="#6ee7b7" font-size="9" font-family="sans-serif">Station</text>
+          </svg>
+          <div class="map-legend" id="map-legend-full"></div>
+        </div>
+        <div id="map-incidents-list"><div style="color:var(--text3);font-size:13px;padding:12px 0">No incidents plotted yet. Waiting for resident reports...</div></div>
+      </div>
+
+      <!-- ── RESPONDERS VIEW ── -->
+      <div class="view" id="v-responders">
+        <div class="section-title">Responder units</div>
+        <div class="responder-grid">
+          <div class="responder-card">
+            <div class="rc-head" style="background:var(--red-lt)">
+              <div class="rc-name" style="color:var(--red)">PNP Cavinti</div>
+              <span class="badge bs">On duty</span>
+            </div>
+            <div class="rc-body">
+              <div class="rc-stat"><span>Active cases</span><span>2</span></div>
+              <div class="rc-stat"><span>Avg. ETA</span><span>4.1 min</span></div>
+              <div class="rc-stat"><span>Alerts received</span><span id="rc-pnp-alerts">0</span></div>
+              <div class="rc-stat"><span>Resolution rate</span><span style="color:var(--green)">94%</span></div>
+            </div>
+          </div>
+          <div class="responder-card">
+            <div class="rc-head" style="background:var(--amber-lt)">
+              <div class="rc-name" style="color:var(--amber)">BFP Cavinti</div>
+              <span class="badge bw">On duty</span>
+            </div>
+            <div class="rc-body">
+              <div class="rc-stat"><span>Active cases</span><span>1</span></div>
+              <div class="rc-stat"><span>Avg. ETA</span><span>5.8 min</span></div>
+              <div class="rc-stat"><span>Alerts received</span><span id="rc-bfp-alerts">0</span></div>
+              <div class="rc-stat"><span>Resolution rate</span><span style="color:var(--green)">97%</span></div>
+            </div>
+          </div>
+          <div class="responder-card">
+            <div class="rc-head" style="background:var(--teal-lt)">
+              <div class="rc-name" style="color:var(--teal)">MDRRMO</div>
+              <span class="badge bt">On duty</span>
+            </div>
+            <div class="rc-body">
+              <div class="rc-stat"><span>Active cases</span><span>2</span></div>
+              <div class="rc-stat"><span>Avg. ETA</span><span>6.3 min</span></div>
+              <div class="rc-stat"><span>Alerts received</span><span id="rc-md-alerts">0</span></div>
+              <div class="rc-stat"><span>Resolution rate</span><span style="color:var(--green)">89%</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Dispatch log — today</div></div>
+          <div class="card-body" style="padding:0">
+            <table class="data-table">
+              <thead><tr><th>Time</th><th>Report ID</th><th>Incident</th><th>Dispatched to</th><th>Status</th></tr></thead>
+              <tbody id="dispatch-log"><tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">No dispatches yet today</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ML VIEW ── -->
+      <div class="view" id="v-ml">
+        <div class="section-title">ML incident classifier</div>
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Latest classification result</div><span class="badge bv">AI powered</span></div>
+              <div class="card-body">
+                <div id="ml-no-data" style="text-align:center;padding:20px;color:var(--text3);font-size:13px">No classifications yet — awaiting resident reports.</div>
+                <div id="ml-result" style="display:none">
+                  <div style="font-size:11px;color:var(--text2);margin-bottom:12px">Input: resident photo + GPS + description → model output</div>
+                  <div id="ml-bars"></div>
+                  <div style="margin-top:12px;padding:12px;background:var(--blue-lt);border-radius:var(--r-sm)" id="ml-verdict"></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Predictive risk zones</div></div>
+              <div class="card-body">
+                <div class="risk-grid">
+                  <div class="risk-card risk-high"><div class="risk-card-title">National Rd km 12–16</div><div class="risk-card-sub">High accident frequency · 7 incidents this month</div></div>
+                  <div class="risk-card risk-med"><div class="risk-card-title">River crossing area</div><div class="risk-card-sub">Flood-prone during rainy season</div></div>
+                  <div class="risk-card risk-low"><div class="risk-card-title">Mtn roads — Brgy. Sipit</div><div class="risk-card-sub">Landslide risk · recent rain detected</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Model performance</div></div>
+              <div class="card-body">
+                <table class="data-table">
+                  <thead><tr><th>Incident type</th><th>Precision</th><th>Recall</th></tr></thead>
+                  <tbody>
+                    <tr><td>Road accident</td><td>93%</td><td>91%</td></tr>
+                    <tr><td>Flooding</td><td>89%</td><td>87%</td></tr>
+                    <tr><td>Landslide</td><td>85%</td><td>84%</td></tr>
+                    <tr><td>Fire</td><td>96%</td><td>94%</td></tr>
+                    <tr><td>Stray animal</td><td>88%</td><td>86%</td></tr>
+                  </tbody>
+                </table>
+                <div style="margin-top:12px;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm);font-size:11px;color:var(--text3)">Model v1.2 · Cavinti dataset · Blockchain-verified · Mar 2026</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BLOCKCHAIN VIEW ── -->
+      <div class="view" id="v-blockchain">
+        <div class="section-title">Blockchain incident log</div>
+        <div class="section-subtitle">Tamper-resistant, cryptographically verified records for every incident report submitted through the system.</div>
+        <div class="two-col" style="margin-bottom:16px">
+          <div class="card" style="margin-bottom:0">
+            <div class="card-header"><div class="card-title">Chain integrity</div><span class="badge bs">Valid ✓</span></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Chain status</span><span style="color:var(--green);font-weight:500">Valid — unbroken</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Total records</span><span id="bc-count" style="font-weight:500">1,048</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Tamper attempts</span><span style="font-weight:500">0</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Last verified</span><span style="font-weight:500">10:40 AM</span></div>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom:0">
+            <div class="card-header"><div class="card-title">Access log</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">PNP Cavinti</span><span style="font-weight:500">Last access: 09:19 AM</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">MDRRMO</span><span style="font-weight:500">Last access: 08:46 AM</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">LGU Admin</span><span style="font-weight:500">Last access: 08:00 AM</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Recent blocks</div></div>
+          <div class="card-body" style="padding:0;overflow-x:auto">
+            <table class="data-table" id="bc-table">
+              <thead><tr><th>Block</th><th>Report ID</th><th>Incident</th><th>Reporter</th><th>Time</th><th>Hash</th><th>Prev hash</th><th>Status</th></tr></thead>
+              <tbody id="bc-tbody">
+                <tr><td>1045</td><td>CVT-2026-0309</td><td>Stray animal</td><td>Maria Santos</td><td>Yesterday</td><td class="hash">0x3c12...a77f</td><td class="hash">0xb891...dd23</td><td><span class="badge bs">Resolved</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROFILE VIEW ── -->
+      <div class="view" id="v-profile">
+        <div style="display:flex;align-items:center;gap:18px;margin-bottom:22px">
+          <div style="width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600" id="profile-av">SS</div>
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700" id="profile-name">Sgt. Ricardo Santos</div>
+            <div style="font-size:13px;color:var(--text2);margin-top:3px" id="profile-unit">PNP Cavinti Station</div>
+            <span class="badge bd" id="profile-badge" style="margin-top:6px">PNP Officer</span>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="card" style="margin-bottom:0">
+            <div class="card-header"><div class="card-title">Account details</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Badge ID</span><span id="profile-bid">PNP-2024-0142</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Station</span><span>Cavinti Municipal</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Reports received today</span><span id="profile-recv">0</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Total cases resolved</span><span>47</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Avg. response time</span><span>4.1 min</span></div>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom:0">
+            <div class="card-header"><div class="card-title">Permissions</div></div>
+            <div class="card-body" id="perms-list" style="display:flex;flex-direction:column;gap:8px;font-size:13px"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const UNITS = {
+  pnp:    {name:'Sgt. Ricardo Santos',  short:'Sgt. Santos',  unit:'PNP Cavinti',    bid:'PNP-2024-0142',  av:'SS', avBg:'#fef2f2', avCl:'#dc2626', badge:'PNP Officer',  bcls:'bd', perms:['View & manage all incidents','Receive dispatch alerts','GPS navigation','Blockchain record access','Update case status']},
+  bfp:    {name:'FO3 Maria Reyes',      short:'FO3 Reyes',    unit:'BFP Cavinti',    bid:'BFP-2023-0088',  av:'MR', avBg:'#fffbeb', avCl:'#d97706', badge:'BFP Officer',  bcls:'bw', perms:['View & manage all incidents','Receive dispatch alerts','GPS navigation','Blockchain record access','Update case status']},
+  mdrrmo: {name:'Chief Dela Torre',     short:'Chief DT',     unit:'MDRRMO Cavinti', bid:'MDRRMO-0034',    av:'DT', avBg:'#ecfeff', avCl:'#0891b2', badge:'MDRRMO',       bcls:'bt', perms:['View & manage all incidents','Receive dispatch alerts','GPS navigation','ML predictive alerts','Blockchain record access']}
+};
+
+const SCAN_DATA = [
+  {type:'Motorcycle accident', sev:'High', sev_cls:'bd', ai_cls:'ai-red', ai_col:'var(--red)',
+   bars:[{l:'Road accident',p:91,c:'#dc2626'},{l:'Fire risk',p:18,c:'#e85520'},{l:'Flooding',p:5,c:'#2563eb'},{l:'Landslide',p:3,c:'#d97706'}],
+   tags:[{cls:'bd',t:'👮 PNP Cavinti'},{cls:'bw',t:'🚒 BFP Cavinti'}],
+   sms:'[CAVINTERGENCY]\nRoad accident · HIGH\nGPS: 14.2378N, 121.5642E\nBy: Juan D.C. · ID: ', mapPin:['qm-p1','mp-p1'], pinLbl:'Accident',pinCl:'#dc2626',
+   dispatch:'PNP + BFP'},
+  {type:'Flash flooding', sev:'High', sev_cls:'bi', ai_cls:'ai-blue', ai_col:'#1d4ed8',
+   bars:[{l:'Flooding',p:88,c:'#2563eb'},{l:'Landslide',p:9,c:'#d97706'},{l:'Road acc.',p:3,c:'#dc2626'}],
+   tags:[{cls:'bt',t:'🌀 MDRRMO'},{cls:'bd',t:'👮 PNP Cavinti'}],
+   sms:'[CAVINTERGENCY]\nFlash flooding · HIGH\nGPS: 14.2251N, 121.5589E\nBy: Juan D.C. · ID: ', mapPin:['qm-p2','mp-p2'], pinLbl:'Flood',pinCl:'#2563eb',
+   dispatch:'MDRRMO + PNP'},
+  {type:'Landslide / debris', sev:'Moderate', sev_cls:'bw', ai_cls:'ai-amber', ai_col:'var(--amber)',
+   bars:[{l:'Landslide',p:84,c:'#d97706'},{l:'Flooding',p:10,c:'#2563eb'},{l:'Road acc.',p:6,c:'#dc2626'}],
+   tags:[{cls:'bt',t:'🌀 MDRRMO'}],
+   sms:'[CAVINTERGENCY]\nLandslide · MODERATE\nGPS: 14.2190N, 121.5701E\nBy: Juan D.C. · ID: ', mapPin:['qm-p3','mp-p3'], pinLbl:'Landslide',pinCl:'#d97706',
+   dispatch:'MDRRMO'},
+  {type:'Structure fire', sev:'Critical', sev_cls:'bd', ai_cls:'ai-red', ai_col:'var(--red)',
+   bars:[{l:'Fire',p:95,c:'#dc2626'},{l:'Road acc.',p:4,c:'#e85520'},{l:'Other',p:1,c:'#9aa3b2'}],
+   tags:[{cls:'bw',t:'🚒 BFP Cavinti'},{cls:'bd',t:'👮 PNP Cavinti'}],
+   sms:'[CAVINTERGENCY]\nStructure fire · CRITICAL\nGPS: 14.2340N, 121.5650E\nBy: Juan D.C. · ID: ', mapPin:['qm-p4','mp-p4'], pinLbl:'Fire',pinCl:'#e85520',
+   dispatch:'BFP + PNP'}
+];
+
+let curUnit = 'pnp', alertCount = 0, todayCount = 0, scanRotate = 0, bcBlock = 1046;
+
+function tick() {
+  const now = new Date();
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('clock').textContent = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} · ${now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'})}`;
+  setTimeout(tick, 30000);
+}
+tick();
+
+function selUnit(u, el) {
+  curUnit = u;
+  document.querySelectorAll('.rs-opt').forEach(r => r.classList.remove('sel'));
+  el.classList.add('sel');
+  const bids = {pnp:'PNP-2024-0142',bfp:'BFP-2023-0088',mdrrmo:'MDRRMO-0034'};
+  document.getElementById('badge-input').value = bids[u];
+}
+
+function doLogin() {
+  const d = UNITS[curUnit];
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app-shell').style.display = 'flex';
+
+  document.getElementById('sb-av').textContent = d.av;
+  document.getElementById('sb-av').style.background = d.avBg;
+  document.getElementById('sb-av').style.color = d.avCl;
+  document.getElementById('sb-uname').textContent = d.short;
+  document.getElementById('sb-urole').textContent = d.badge;
+  document.getElementById('profile-name').textContent = d.name;
+  document.getElementById('profile-unit').textContent = d.unit + ' Station';
+  document.getElementById('profile-bid').textContent = d.bid;
+  const pb = document.getElementById('profile-badge');
+  pb.textContent = d.badge; pb.className = 'badge ' + d.bcls;
+  const pav = document.getElementById('profile-av');
+  pav.textContent = d.av; pav.style.background = d.avBg; pav.style.color = d.avCl;
+  document.getElementById('perms-list').innerHTML = d.perms.map(p =>
+    `<div style="display:flex;align-items:center;gap:9px"><div style="width:18px;height:18px;border-radius:4px;background:var(--green-lt);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">✓</div>${p}</div>`
+  ).join('');
+
+  // Poll for resident reports
+  startPolling();
+}
+
+function doLogout() {
+  document.getElementById('login-page').style.display = 'flex';
+  document.getElementById('app-shell').style.display = 'none';
+  clearInterval(pollInterval);
+}
+
+function navTo(page) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('nav-' + page).classList.add('active');
+  document.getElementById('v-' + page).classList.add('active');
+  document.getElementById('topbar-title').textContent = {
+    alerts:'Incoming alerts', map:'Incident map', responders:'Responder units',
+    ml:'ML classifier', blockchain:'Blockchain log', profile:'My profile'
+  }[page];
+}
+
+let pollInterval;
+function startPolling() {
+  // Simulate incoming reports from resident app every 8–12 seconds (demo mode)
+  let demoIdx = 0;
+  function triggerDemo() {
+    if (demoIdx < SCAN_DATA.length) {
+      deliverReport(SCAN_DATA[demoIdx]);
+      demoIdx++;
+    }
+  }
+  // Also check localStorage for real resident app reports
+  pollInterval = setInterval(() => {
+    try {
+      const raw = localStorage.getItem('cvt_latest_report');
+      if (raw) {
+        const r = JSON.parse(raw);
+        if (!r._consumed) {
+          r._consumed = true;
+          localStorage.setItem('cvt_latest_report', JSON.stringify(r));
+          deliverRealReport(r);
+        }
+      }
+    } catch(e) {}
+  }, 1500);
+}
+
+function deliverRealReport(r) {
+  alertCount++; todayCount++;
+  updateCounts();
+  const d = SCAN_DATA.find(s => s.type.toLowerCase().includes(r.type.toLowerCase().split(' ')[0])) || SCAN_DATA[0];
+  const aid = 'alert-' + Date.now();
+  addAlertCard(aid, r.type, r.severity, d, r.id, r.time, r.reporter);
+  addBlockchainRow(r.id, r.type, r.reporter, r.time);
+  showNotif('New alert!', r.type + ' from ' + r.reporter);
+  updateML(d);
+  d.mapPin.forEach(p => {const el=document.getElementById(p);if(el)el.style.display='block';});
+  updateMapLegend(d);
+  updateDispatchLog(r.id, r.type, d.dispatch, r.time);
+}
+
+function deliverReport(d) {
+  alertCount++; todayCount++;
+  updateCounts();
+  const rid = 'CVT-2026-' + String(1046 + alertCount);
+  const now = new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'});
+  const aid = 'alert-' + Date.now();
+  addAlertCard(aid, d.type, d.sev, d, rid, now, 'Juan D.C.');
+  addBlockchainRow(rid, d.type, 'Juan D.C.', now);
+  showNotif('New alert from resident!', d.type);
+  updateML(d);
+  d.mapPin.forEach(p => {const el=document.getElementById(p);if(el)el.style.display='block';});
+  updateMapLegend(d);
+  updateDispatchLog(rid, d.type, d.dispatch, now);
+}
+
+function addAlertCard(aid, type, sev, d, rid, time, reporter) {
+  document.getElementById('no-alerts').style.display = 'none';
+  const feed = document.getElementById('alerts-feed');
+  const tags = d.tags.map(t => `<span class="badge ${t.cls}" style="font-size:10px">${t.t}</span>`).join('');
+  const wrap = document.createElement('div');
+  wrap.className = 'new-alert-flash';
+  wrap.innerHTML = `<div class="alert-item ${d.ai_cls}" id="${aid}">
+    <div class="ai-head">
+      <div class="ai-type" style="color:${d.ai_col}">${type}</div>
+      <span class="badge ${d.sev_cls}">${sev}</span>
+    </div>
+    <div class="ai-meta">From: ${reporter} · ${time} · GPS: 14.2378° N, 121.5642° E · Report ID: ${rid}</div>
+    <div class="ai-tags">${tags}</div>
+    <div class="sms-box"><div class="sms-text">${(d.sms+rid).replace(/\n/g,'<br>')}</div></div>
+    <div class="ai-btns">
+      <button class="btn-accept" onclick="acceptAlert('${aid}','${type}')">Accept &amp; respond</button>
+      <button class="btn-forward" onclick="forwardAlert('${aid}')">Forward</button>
+      <button class="btn-close" onclick="dismissAlert('${aid}')">Dismiss</button>
+    </div>
+    <div class="ai-time">Received ${time} · Blockchain logged · SMS sent to units</div>
+  </div>`;
+  feed.prepend(wrap);
+
+  // Notify bell
+  const bell = document.getElementById('bell');
+  bell.classList.remove('bell-ring');
+  void bell.offsetWidth;
+  bell.classList.add('bell-ring');
+}
+
+function acceptAlert(id, label) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.className = 'alert-item ai-green';
+    el.innerHTML = `<div class="ai-head"><div class="ai-type" style="color:var(--green)">Accepted — en route</div><span class="badge bs">En route</span></div><div class="ai-meta">${label} · Navigating to GPS location · ETA: ~4 min</div>`;
+    alertCount = Math.max(0, alertCount - 1);
+    updateCounts();
+  }
+}
+function forwardAlert(id) {
+  const el = document.getElementById(id);
+  if (el) { el.style.opacity = '0.45'; el.querySelector('.ai-btns').remove(); }
+}
+function dismissAlert(id) {
+  const el = document.getElementById(id);
+  if (el) { el.closest('.new-alert-flash')?.remove() || el.remove(); alertCount=Math.max(0,alertCount-1); updateCounts(); }
+}
+
+function updateCounts() {
+  document.getElementById('m-active').textContent = alertCount;
+  document.getElementById('m-today').textContent = todayCount;
+  document.getElementById('profile-recv').textContent = todayCount;
+  const badge = document.getElementById('nav-badge');
+  const tb = document.getElementById('tb-badge');
+  if (alertCount > 0) {
+    badge.textContent = alertCount; badge.style.display = 'inline-flex';
+    tb.textContent = alertCount + ' active'; tb.style.display = 'inline-flex';
+  } else { badge.style.display = 'none'; tb.style.display = 'none'; }
+  document.getElementById('rc-pnp-alerts').textContent = todayCount;
+  document.getElementById('rc-bfp-alerts').textContent = Math.floor(todayCount * .6);
+  document.getElementById('rc-md-alerts').textContent = Math.floor(todayCount * .8);
+}
+
+function addBlockchainRow(rid, type, reporter, time) {
+  bcBlock++;
+  document.getElementById('bc-count').textContent = (1048 + todayCount).toLocaleString();
+  const tbody = document.getElementById('bc-tbody');
+  const hash = '0x' + Math.random().toString(16).slice(2,6) + '...' + Math.random().toString(16).slice(2,6);
+  const phash = '0x' + Math.random().toString(16).slice(2,6) + '...' + Math.random().toString(16).slice(2,6);
+  const row = document.createElement('tr');
+  row.innerHTML = `<td style="font-weight:500">${bcBlock}</td><td>${rid}</td><td>${type}</td><td>${reporter}</td><td>${time}</td><td class="hash">${hash}</td><td class="hash">${phash}</td><td><span class="badge bd">Active</span></td>`;
+  tbody.prepend(row);
+}
+
+function updateML(d) {
+  document.getElementById('ml-no-data').style.display = 'none';
+  document.getElementById('ml-result').style.display = 'block';
+  document.getElementById('ml-bars').innerHTML = d.bars.map(b =>
+    `<div class="pb-row"><div class="pb-label">${b.l}</div><div class="pb-track"><div class="pb-fill" style="width:${b.p}%;background:${b.c}"></div></div><div class="pb-pct">${b.p}%</div></div>`
+  ).join('');
+  document.getElementById('ml-verdict').innerHTML = `<div style="font-size:13px;font-weight:600;color:#1e40af">Classified: ${d.type} · ${d.bars[0].p}% confidence</div><div style="font-size:12px;color:var(--text2);margin-top:3px">Dispatching ${d.dispatch} automatically</div>`;
+}
+
+function updateMapLegend(d) {
+  const leg = document.getElementById('map-legend');
+  const legFull = document.getElementById('map-legend-full');
+  const item = `<div class="map-legend-item"><div class="ml-dot" style="background:${d.pinCl}"></div>${d.pinLbl}</div>`;
+  if (!leg.innerHTML.includes(d.pinLbl)) { leg.innerHTML += item; legFull.innerHTML += item; }
+}
+
+function updateDispatchLog(rid, type, dispatch, time) {
+  const tb = document.getElementById('dispatch-log');
+  if (tb.querySelector('td[colspan]')) tb.innerHTML = '';
+  const row = document.createElement('tr');
+  row.innerHTML = `<td>${time}</td><td>${rid}</td><td>${type}</td><td>${dispatch}</td><td><span class="badge bd">Active</span></td>`;
+  tb.prepend(row);
+}
+
+function showPinDetail(type) {
+  const map = {accident:'Motorcycle accident · National Rd km 14.2 · 9:18 AM',flood:'Flash flooding · River crossing · 8:45 AM',landslide:'Landslide · Brgy. Sipit · 7:30 AM',fire:'Structure fire · Km 8 · Just now'};
+  showNotif('Incident pin', map[type] || type);
+}
+
+let notifTimer;
+function showNotif(title, body) {
+  const el = document.getElementById('notif-banner');
+  document.getElementById('nb-title').textContent = title;
+  document.getElementById('nb-body').textContent = body;
+  el.classList.add('show');
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(() => el.classList.remove('show'), 4000);
+}
+</script>
+</body>
+</html>
